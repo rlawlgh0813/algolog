@@ -55,14 +55,14 @@ AlgoLog는 단순한 풀이 게시판이 아니라, **문제 풀이 과정에서
 - [프로젝트 명세](docs/project-spec.md)
 - [ERD](docs/erd.md)
 - [트러블슈팅](docs/troubleshooting.md)
-- API 명세: 작성 예정
+- [API 명세](docs/api-spec.md)
 
 ## 진행 상태
 
 - [x] 프로젝트 정의
 - [x] MVP 범위 정리
 - [x] 엔티티 설계
-- [ ] API 초안 작성
+- [x] API 초안 작성
 - [ ] Spring Boot 프로젝트 세팅
 - [ ] 인증 기능 구현
 - [ ] 핵심 도메인 기능 구현
