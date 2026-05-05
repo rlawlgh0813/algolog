@@ -63,8 +63,20 @@ AlgoLog는 단순한 풀이 게시판이 아니라, **문제 풀이 과정에서
 - [x] MVP 범위 정리
 - [x] 엔티티 설계
 - [x] API 초안 작성
-- [ ] Spring Boot 프로젝트 세팅
+- [x] Spring Boot 프로젝트 세팅
 - [ ] 인증 기능 구현
 - [ ] 핵심 도메인 기능 구현
 - [ ] 예외 처리 / Validation 정리
 - [ ] 문서화 및 최종 점검
+
+## 로컬 실행
+
+```bash
+./gradlew bootRun
+```
+
+Windows PowerShell에서는 아래 명령을 사용할 수 있습니다.
+
+```powershell
+.\gradlew.bat bootRun
+```
