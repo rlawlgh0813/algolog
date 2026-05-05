@@ -81,3 +81,35 @@ PowerShell `Set-Content -Encoding UTF8`로 Java 파일을 생성하면서 BOM �
 ```
 
 결과: 성공
+## #5 전역 예외 처리 구조 구현
+
+### 브랜치
+
+- `feature/#5-global-exception`
+
+### 목적
+
+기능별 API 구현 전에 예외 응답 형식을 통일하여 인증, Problem, SolutionRecord 기능에서 같은 방식으로 실패 응답을 내려줄 수 있게 합니다.
+
+### 작업 내용
+
+- `ErrorCode` enum 추가
+- `BusinessException` 추가
+- `ErrorResponse` 추가
+- `GlobalExceptionHandler` 추가
+- Bean Validation 실패 응답 처리
+
+### 설계 메모
+
+- `ErrorCode`는 HTTP 상태와 기본 메시지를 함께 가집니다.
+- Service 계층에서는 `BusinessException`을 던지고, ControllerAdvice가 HTTP 응답으로 변환합니다.
+- Validation 실패는 필드별 오류를 `fieldErrors`에 담아 반환합니다.
+- Spring Security Filter 단계에서 발생하는 인증/인가 예외는 이후 인증 구현 단계에서 별도 entry point/access denied handler로 보강합니다.
+
+### 검증
+
+```powershell
+.\gradlew.bat test
+```
+
+결과: 성공
