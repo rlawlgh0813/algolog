@@ -113,3 +113,42 @@ PowerShell `Set-Content -Encoding UTF8`로 Java 파일을 생성하면서 BOM �
 ```
 
 결과: 성공
+## #7 회원가입 API 구현
+
+### 브랜치
+
+- `feature/#7-auth-signup`
+
+### 목적
+
+사용자가 이메일, 비밀번호, 닉네임으로 가입할 수 있는 API를 구현합니다.
+
+### 작업 내용
+
+- `UserRepository` 추가
+- `SignupRequest`, `SignupResponse` DTO 추가
+- `AuthService` 추가
+- `AuthController` 추가
+- `SecurityConfig` 추가
+- BCrypt 기반 `PasswordEncoder` 설정
+- 이메일 중복 검증 추가
+- 회원가입 성공/중복 이메일 API 테스트 추가
+
+### 설계 메모
+
+- 비밀번호는 평문으로 저장하지 않고 BCrypt로 암호화합니다.
+- Entity를 API 응답으로 직접 반환하지 않고 응답 DTO를 사용합니다.
+- 이메일 중복은 Service 계층에서 먼저 검증하고, 이후 DB 유니크 제약과 함께 보호합니다.
+- JWT 구현 전까지는 Security 설정에서 요청을 임시로 허용하고, 로그인/JWT 단계에서 인증 필요한 API를 잠글 예정입니다.
+
+### 트러블슈팅
+
+Spring Boot 4에서는 기존 Boot 3 예제와 달리 `AutoConfigureMockMvc` 패키지가 `org.springframework.boot.webmvc.test.autoconfigure`로 이동했고, Jackson도 3.x 계열의 `tools.jackson.databind.ObjectMapper`를 사용합니다. 테스트 컴파일 실패 후 Gradle 의존성과 jar 내부 패키지를 확인해 수정했습니다.
+
+### 검증
+
+```powershell
+.\gradlew.bat test
+```
+
+결과: 성공
