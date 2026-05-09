@@ -1,34 +1,43 @@
 # AlgoLog
 
-알고리즘 문제 풀이를 구조적으로 기록하고, 반례와 오답 원인, 해결 메모까지 함께 관리하는 백엔드 프로젝트입니다.
+알고리즘 문제 풀이 과정을 구조화해서 기록하는 backend project입니다.
 
-## 프로젝트 배경
+블로그나 노션에 풀이를 자유롭게 적는 방식은 편하지만, 문제 정보, 오답 원인, 반례, 복습 필요 여부를 일관된 기준으로 다시 찾기 어렵습니다. AlgoLog는 풀이 기록을 `Problem`, `SolutionRecord`, `CounterExample`로 분리해 저장하고, 사용자가 자신의 문제 풀이 과정을 복습 가능한 데이터로 관리할 수 있게 만드는 것을 목표로 합니다.
 
-기존 블로그형 풀이 기록은 자유롭게 작성할 수 있다는 장점이 있지만, 문제 번호, 플랫폼, 난이도, 태그, 반례, 오답 원인, 복습 필요 여부 같은 정보를 체계적으로 관리하고 다시 찾기에는 불편합니다.
+> Status: 진행 중
+>
+> Current stage: Spring Boot 프로젝트 세팅, 핵심 도메인 엔티티, 전역 예외 처리 구현
 
-AlgoLog는 단순한 풀이 게시판이 아니라, **문제 풀이 과정에서 어떤 입력에 실패했고, 왜 틀렸으며, 어떻게 수정했는지**를 구조화하여 저장하는 학습 기록 서비스를 목표로 합니다.
+## Why I Built This
 
-## 핵심 목표
+알고리즘 문제를 풀다 보면 정답 코드보다 중요한 정보가 따로 남습니다.
 
-- 문제 정보와 풀이 기록을 분리하여 관리
-- 풀이 내용뿐 아니라 오답 원인과 반례를 함께 기록
-- 해결 상태, 복습 필요 여부, 공개 여부를 기준으로 학습 기록 관리
-- 공개된 풀이를 탐색하여 같은 문제에 대한 다양한 접근 방식 확인
-- 백엔드 포트폴리오에 적합한 인증, 권한, CRUD, 검색, 예외 처리 구조 구현
+- 어떤 반례에서 틀렸는지
+- 왜 그 접근이 실패했는지
+- 어떤 조건을 놓쳤는지
+- 다시 풀어야 하는 문제인지
+- 같은 문제를 다른 방식으로 풀 수 있는지
 
-## 핵심 도메인
+AlgoLog는 이런 정보를 단순한 게시글 본문에 섞어두지 않고, 도메인으로 분리해 관리하는 학습 기록 서비스를 지향합니다.
 
-| 도메인 | 설명 |
+## Core Idea
+
+| Domain | Role |
 | --- | --- |
-| User | 서비스 사용자와 인증 정보 |
-| Problem | 알고리즘 문제의 플랫폼, 번호, 제목, 난이도 등 메타데이터 |
-| SolutionRecord | 특정 사용자가 특정 문제에 대해 작성한 풀이 기록 |
-| CounterExample | 풀이 과정에서 실패한 테스트케이스, 오답 원인, 수정 메모 |
+| `User` | 서비스를 사용하는 회원과 인증 정보 |
+| `Problem` | 플랫폼, 문제 번호, 제목, 난이도 같은 문제 메타데이터 |
+| `SolutionRecord` | 특정 사용자가 특정 문제에 대해 작성한 풀이 기록 |
+| `CounterExample` | 풀이 과정에서 실패한 입력, 오답 원인, 수정 메모 |
 
-## MVP 기능
+핵심은 `Post`가 아니라 `SolutionRecord`를 중심 도메인으로 둔 것입니다. 문제 자체의 정보와 사용자의 풀이 기록을 분리하고, 반례를 별도 엔티티로 관리해 하나의 풀이 기록에 여러 실패 케이스를 연결할 수 있게 설계했습니다.
+
+## Features
+
+### MVP Scope
 
 - 회원가입 / 로그인
-- 문제 등록, 조회, 목록 조회
+- JWT 기반 인증
+- 문제 등록, 조회, 검색
 - 풀이 기록 작성, 조회, 수정, 삭제
 - 반례 작성, 조회
 - 내 풀이 기록 필터 조회
@@ -37,46 +46,147 @@ AlgoLog는 단순한 풀이 게시판이 아니라, **문제 풀이 과정에서
 - 비공개 풀이 접근 제한
 - 작성자 기반 수정 / 삭제 권한 처리
 
-## 기술 스택
+### Implemented
 
-- Java
-- Spring Boot
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- JWT
-- Bean Validation
-- Lombok
-- H2 / MySQL
-- Swagger 또는 Spring REST Docs
+- Spring Boot Gradle 프로젝트 세팅
+- H2 기반 local database 설정
+- JPA Auditing 기반 `createdAt`, `updatedAt` 공통 처리
+- 핵심 도메인 엔티티 구현
+  - `User`
+  - `Problem`
+  - `SolutionRecord`
+  - `CounterExample`
+- Enum 설계
+  - `SolvingStatus`
+  - `Visibility`
+- DB 제약 조건과 인덱스 설정
+  - user email unique
+  - problem platform + problem number unique
+  - solution record author/problem/visibility index
+  - counter example solution record index
+- 전역 예외 처리 구조 구현
+  - `ErrorCode`
+  - `BusinessException`
+  - `ErrorResponse`
+  - `GlobalExceptionHandler`
+  - Bean Validation 실패 응답 처리
 
-## 문서
+### Next
 
-- [프로젝트 명세](docs/project-spec.md)
+- Repository / Service / Controller 계층 구현
+- 회원가입과 로그인 구현
+- Spring Security + JWT 인증 흐름 구현
+- Problem CRUD API 구현
+- SolutionRecord CRUD API 구현
+- CounterExample API 구현
+- 공개 / 비공개 조회 권한 처리
+- API 테스트와 문서화
+
+## Architecture
+
+```mermaid
+erDiagram
+    USERS ||--o{ SOLUTION_RECORDS : writes
+    PROBLEMS ||--o{ SOLUTION_RECORDS : has
+    SOLUTION_RECORDS ||--o{ COUNTER_EXAMPLES : contains
+
+    USERS {
+        bigint id PK
+        varchar email UK
+        varchar password
+        varchar nickname
+        datetime created_at
+        datetime updated_at
+    }
+
+    PROBLEMS {
+        bigint id PK
+        varchar platform
+        varchar problem_number
+        varchar title
+        varchar difficulty
+        datetime created_at
+        datetime updated_at
+    }
+
+    SOLUTION_RECORDS {
+        bigint id PK
+        bigint author_id FK
+        bigint problem_id FK
+        varchar title
+        text solution_memo
+        text mistake_note
+        varchar solving_status
+        boolean review_needed
+        varchar visibility
+        datetime created_at
+        datetime updated_at
+    }
+
+    COUNTER_EXAMPLES {
+        bigint id PK
+        bigint solution_record_id FK
+        text input_example
+        text expected_behavior
+        text wrong_reason
+        text fix_memo
+        datetime created_at
+        datetime updated_at
+    }
+```
+
+## Technical Decisions
+
+### Problem and SolutionRecord are separated
+
+같은 문제에 대해 여러 사용자가 풀이 기록을 작성할 수 있으므로, 문제 메타데이터는 `Problem`에 저장하고 사용자의 풀이 기록은 `SolutionRecord`로 분리했습니다.
+
+### CounterExample is an entity
+
+반례는 단순 문자열 필드보다 별도 엔티티가 적합하다고 판단했습니다. 하나의 풀이 기록에 여러 반례가 연결될 수 있고, 실패 입력, 기대 동작, 오답 원인, 수정 메모를 따로 관리할 수 있기 때문입니다.
+
+### Relationships are kept one-way first
+
+초기 구현에서는 양방향 연관관계를 최소화했습니다. 순환 참조와 불필요한 객체 그래프 로딩을 피하고, API 응답은 Entity가 아니라 DTO로 분리할 계획입니다.
+
+### Error responses are centralized
+
+기능별 API 구현 전에 `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`를 먼저 구성했습니다. 이후 인증, 문제, 풀이 기록 API에서 같은 형식의 실패 응답을 반환하도록 하기 위함입니다.
+
+## Tech Stack
+
+| Category | Stack |
+| --- | --- |
+| Language | `Java 17` |
+| Framework | `Spring Boot`, `Spring Web MVC` |
+| Persistence | `Spring Data JPA`, `H2`, `MySQL` |
+| Security | `Spring Security`, `JWT` |
+| Validation | `Bean Validation` |
+| Build | `Gradle` |
+| Tools | `Lombok`, `Git`, `GitHub` |
+
+## Documents
+
+- [Project Spec](docs/project-spec.md)
+- [API Spec](docs/api-spec.md)
 - [ERD](docs/erd.md)
-- [트러블슈팅](docs/troubleshooting.md)
-- [API 명세](docs/api-spec.md)
+- [Development Log](docs/development-log.md)
+- [Troubleshooting](docs/troubleshooting.md)
 
-## 진행 상태
-
-- [x] 프로젝트 정의
-- [x] MVP 범위 정리
-- [x] 엔티티 설계
-- [x] API 초안 작성
-- [x] Spring Boot 프로젝트 세팅
-- [ ] 인증 기능 구현
-- [ ] 핵심 도메인 기능 구현
-- [ ] 예외 처리 / Validation 정리
-- [ ] 문서화 및 최종 점검
-
-## 로컬 실행
+## Run Locally
 
 ```bash
 ./gradlew bootRun
 ```
 
-Windows PowerShell에서는 아래 명령을 사용할 수 있습니다.
+Windows PowerShell:
 
 ```powershell
 .\gradlew.bat bootRun
+```
+
+Run tests:
+
+```bash
+./gradlew test
 ```
