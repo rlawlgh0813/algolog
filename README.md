@@ -6,7 +6,7 @@
 
 > Status: 진행 중
 >
-> Current stage: Spring Boot 프로젝트 세팅, 핵심 도메인 엔티티, 전역 예외 처리 구현
+> Current stage: 회원가입, 로그인, JWT Access Token 발급 구현
 
 ## Why I Built This
 
@@ -70,16 +70,19 @@ AlgoLog는 이런 정보를 단순한 게시글 본문에 섞어두지 않고, �
   - `ErrorResponse`
   - `GlobalExceptionHandler`
   - Bean Validation 실패 응답 처리
+- 인증 API 구현
+  - 회원가입
+  - 로그인
+  - BCrypt 비밀번호 검증
+  - JWT Access Token 발급
 
 ### Next
 
-- Repository / Service / Controller 계층 구현
-- 회원가입과 로그인 구현
-- Spring Security + JWT 인증 흐름 구현
 - Problem CRUD API 구현
 - SolutionRecord CRUD API 구현
 - CounterExample API 구현
 - 공개 / 비공개 조회 권한 처리
+- JWT 인증 필터와 Security 예외 응답 보강
 - API 테스트와 문서화
 
 ## Architecture
