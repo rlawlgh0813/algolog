@@ -6,7 +6,7 @@
 
 > Status: 진행 중
 >
-> Current stage: 회원가입, 로그인, JWT Access Token 발급 구현
+> Current stage: 회원가입, 로그인, JWT Access Token 발급, Problem API 구현
 
 ## Why I Built This
 
@@ -75,10 +75,15 @@ AlgoLog는 이런 정보를 단순한 게시글 본문에 섞어두지 않고, �
   - 로그인
   - BCrypt 비밀번호 검증
   - JWT Access Token 발급
+- Problem API 구현
+  - 문제 등록
+  - 문제 단건 조회
+  - 문제 목록 검색
+  - 플랫폼, 난이도, 키워드 필터
+  - 중복 문제 등록 방지
 
 ### Next
 
-- Problem CRUD API 구현
 - SolutionRecord CRUD API 구현
 - CounterExample API 구현
 - 공개 / 비공개 조회 권한 처리
