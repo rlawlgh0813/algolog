@@ -43,6 +43,7 @@ AlgoLog 구현 과정을 이슈 단위로 기록합니다. GitHub Issue를 함�
 ### 메모
 
 현재 로컬 환경에 GitHub CLI(`gh`)가 설치되어 있지 않아 GitHub Issue 자동 생성은 보류했습니다. 이후 `#1` 이슈를 GitHub에서 생성하면 이 브랜치와 커밋을 연결할 수 있습니다.
+
 ## #3 도메인 엔티티 구현
 
 ### 브랜치
@@ -73,6 +74,79 @@ AlgoLog 구현 과정을 이슈 단위로 기록합니다. GitHub Issue를 함�
 ### 트러블슈팅
 
 PowerShell `Set-Content -Encoding UTF8`로 Java 파일을 생성하면서 BOM 문자가 붙어 `illegal character: '\ufeff'` 컴파일 오류가 발생했습니다. Java 파일을 UTF-8 BOM 없이 다시 저장해 해결했습니다.
+
+### 검증
+
+```powershell
+.\gradlew.bat test
+```
+
+결과: 성공
+
+## #5 전역 예외 처리 구조 구현
+
+### 브랜치
+
+- `feature/#5-global-exception`
+
+### 목적
+
+기능별 API 구현 전에 예외 응답 형식을 통일하여 인증, Problem, SolutionRecord 기능에서 같은 방식으로 실패 응답을 내려줄 수 있게 합니다.
+
+### 작업 내용
+
+- `ErrorCode` enum 추가
+- `BusinessException` 추가
+- `ErrorResponse` 추가
+- `GlobalExceptionHandler` 추가
+- Bean Validation 실패 응답 처리
+
+### 설계 메모
+
+- `ErrorCode`는 HTTP 상태와 기본 메시지를 함께 가집니다.
+- Service 계층에서는 `BusinessException`을 던지고, ControllerAdvice가 HTTP 응답으로 변환합니다.
+- Validation 실패는 필드별 오류를 `fieldErrors`에 담아 반환합니다.
+- Spring Security Filter 단계에서 발생하는 인증/인가 예외는 이후 인증 구현 단계에서 별도 entry point/access denied handler로 보강합니다.
+
+### 검증
+
+```powershell
+.\gradlew.bat test
+```
+
+결과: 성공
+
+## #7 회원가입 API 구현
+
+### 브랜치
+
+- `feature/#7-auth-signup`
+
+### 목적
+
+사용자가 이메일, 비밀번호, 닉네임으로 가입할 수 있는 API를 구현합니다.
+
+### 작업 내용
+
+- `UserRepository` 추가
+- `SignupRequest`, `SignupResponse` DTO 추가
+- `AuthService` 추가
+- `AuthController` 추가
+- `SecurityConfig` 추가
+- BCrypt 기반 `PasswordEncoder` 설정
+- 이메일 중복 검증 추가
+- 회원가입 성공/중복 이메일 API 테스트 추가
+
+### 설계 메모
+
+- 비밀번호는 평문으로 저장하지 않고 BCrypt로 암호화합니다.
+- Entity를 API 응답으로 직접 반환하지 않고 응답 DTO를 사용합니다.
+- 이메일 중복은 Service 계층에서 먼저 검증하고, 이후 DB 유니크 제약과 함께 보호합니다.
+- JWT 구현 전까지는 Security 설정에서 요청을 임시로 허용하고, 로그인/JWT 단계에서 인증 필요한 API를 잠글 예정입니다.
+
+### 트러블슈팅
+
+Spring Boot 4에서는 기존 Boot 3 예제와 달리 `AutoConfigureMockMvc` 패키지가 `org.springframework.boot.webmvc.test.autoconfigure`로 이동했고, Jackson도 3.x 계열의 `tools.jackson.databind.ObjectMapper`를 사용합니다. 테스트 컴파일 실패 후 Gradle 의존성과 jar 내부 패키지를 확인해 수정했습니다.
 
 ### 검증
 
@@ -117,74 +191,38 @@ PowerShell `Set-Content -Encoding UTF8`로 Java 파일을 생성하면서 BOM �
 ```
 
 결과: 성공
-## #5 전역 예외 처리 구조 구현
+
+## #10 Problem CRUD and search API
 
 ### 브랜치
 
-- `feature/#5-global-exception`
+- `feature/#10-problem-api`
 
 ### 목적
 
-기능별 API 구현 전에 예외 응답 형식을 통일하여 인증, Problem, SolutionRecord 기능에서 같은 방식으로 실패 응답을 내려줄 수 있게 합니다.
+문제 메타데이터를 등록, 조회, 검색할 수 있는 API를 구현합니다.
 
 ### 작업 내용
 
-- `ErrorCode` enum 추가
-- `BusinessException` 추가
-- `ErrorResponse` 추가
-- `GlobalExceptionHandler` 추가
-- Bean Validation 실패 응답 처리
+- `ProblemRepository` 추가
+- `ProblemCreateRequest`, `ProblemResponse` DTO 추가
+- 공통 페이지 응답 DTO 추가
+- 문제 등록 API 추가
+- 문제 단건 조회 API 추가
+- 플랫폼, 난이도, 키워드 기반 문제 목록 검색 API 추가
+- `platform + problemNumber` 중복 검증 추가
+- 문제 API 통합 테스트 추가
 
 ### 설계 메모
 
-- `ErrorCode`는 HTTP 상태와 기본 메시지를 함께 가집니다.
-- Service 계층에서는 `BusinessException`을 던지고, ControllerAdvice가 HTTP 응답으로 변환합니다.
-- Validation 실패는 필드별 오류를 `fieldErrors`에 담아 반환합니다.
-- Spring Security Filter 단계에서 발생하는 인증/인가 예외는 이후 인증 구현 단계에서 별도 entry point/access denied handler로 보강합니다.
+- 문제는 특정 사용자의 소유가 아니라 서비스 전체에서 공유하는 메타데이터로 처리합니다.
+- 키워드는 문제 번호와 제목에 대해 부분 검색합니다.
+- 문서상 문제 등록은 인증이 필요하지만, 현재 단계에서는 JWT 검증 필터가 아직 없으므로 엔드포인트 인증 강제는 이후 인증/인가 이슈에서 보강합니다.
 
 ### 검증
 
-```powershell
-.\gradlew.bat test
-```
-
-결과: 성공
-## #7 회원가입 API 구현
-
-### 브랜치
-
-- `feature/#7-auth-signup`
-
-### 목적
-
-사용자가 이메일, 비밀번호, 닉네임으로 가입할 수 있는 API를 구현합니다.
-
-### 작업 내용
-
-- `UserRepository` 추가
-- `SignupRequest`, `SignupResponse` DTO 추가
-- `AuthService` 추가
-- `AuthController` 추가
-- `SecurityConfig` 추가
-- BCrypt 기반 `PasswordEncoder` 설정
-- 이메일 중복 검증 추가
-- 회원가입 성공/중복 이메일 API 테스트 추가
-
-### 설계 메모
-
-- 비밀번호는 평문으로 저장하지 않고 BCrypt로 암호화합니다.
-- Entity를 API 응답으로 직접 반환하지 않고 응답 DTO를 사용합니다.
-- 이메일 중복은 Service 계층에서 먼저 검증하고, 이후 DB 유니크 제약과 함께 보호합니다.
-- JWT 구현 전까지는 Security 설정에서 요청을 임시로 허용하고, 로그인/JWT 단계에서 인증 필요한 API를 잠글 예정입니다.
-
-### 트러블슈팅
-
-Spring Boot 4에서는 기존 Boot 3 예제와 달리 `AutoConfigureMockMvc` 패키지가 `org.springframework.boot.webmvc.test.autoconfigure`로 이동했고, Jackson도 3.x 계열의 `tools.jackson.databind.ObjectMapper`를 사용합니다. 테스트 컴파일 실패 후 Gradle 의존성과 jar 내부 패키지를 확인해 수정했습니다.
-
-### 검증
-
-```powershell
-.\gradlew.bat test
+```bash
+./gradlew test
 ```
 
 결과: 성공
