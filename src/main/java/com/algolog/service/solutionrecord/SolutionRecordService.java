@@ -14,6 +14,7 @@ import com.algolog.dto.solutionrecord.SolutionRecordUpdateRequest;
 import com.algolog.dto.solutionrecord.SolutionRecordUpdateResponse;
 import com.algolog.global.exception.BusinessException;
 import com.algolog.global.exception.ErrorCode;
+import com.algolog.repository.counterexample.CounterExampleRepository;
 import com.algolog.repository.problem.ProblemRepository;
 import com.algolog.repository.solutionrecord.SolutionRecordRepository;
 import com.algolog.repository.user.UserRepository;
@@ -29,6 +30,7 @@ public class SolutionRecordService {
     private final SolutionRecordRepository solutionRecordRepository;
     private final ProblemRepository problemRepository;
     private final UserRepository userRepository;
+    private final CounterExampleRepository counterExampleRepository;
 
     @Transactional
     public SolutionRecordResponse create(Long authorId, SolutionRecordCreateRequest request) {
@@ -102,6 +104,7 @@ public class SolutionRecordService {
     public void delete(Long currentUserId, Long solutionRecordId) {
         SolutionRecord solutionRecord = getSolutionRecord(solutionRecordId);
         validateAuthor(currentUserId, solutionRecord);
+        counterExampleRepository.deleteAllBySolutionRecordId(solutionRecordId);
         solutionRecordRepository.delete(solutionRecord);
     }
 
