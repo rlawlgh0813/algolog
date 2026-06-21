@@ -73,6 +73,40 @@ public class SolutionRecordService {
     }
 
     @Transactional(readOnly = true)
+    public PageResponse<MySolutionRecordResponse> searchPublic(
+        String platform,
+        String difficulty,
+        SolvingStatus solvingStatus,
+        Boolean reviewNeeded,
+        Pageable pageable
+    ) {
+        return PageResponse.from(solutionRecordRepository.searchPublic(
+            Visibility.PUBLIC,
+            normalize(platform),
+            normalize(difficulty),
+            solvingStatus,
+            reviewNeeded,
+            pageable
+        ).map(MySolutionRecordResponse::from));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MySolutionRecordResponse> getPublicByProblemId(
+        Long problemId,
+        Pageable pageable
+    ) {
+        if (!problemRepository.existsById(problemId)) {
+            throw new BusinessException(ErrorCode.PROBLEM_NOT_FOUND);
+        }
+
+        return PageResponse.from(solutionRecordRepository.findPublicByProblemId(
+            Visibility.PUBLIC,
+            problemId,
+            pageable
+        ).map(MySolutionRecordResponse::from));
+    }
+
+    @Transactional(readOnly = true)
     public SolutionRecordDetailResponse getById(Long currentUserId, Long solutionRecordId) {
         SolutionRecord solutionRecord = getSolutionRecord(solutionRecordId);
         validateReadable(currentUserId, solutionRecord);
