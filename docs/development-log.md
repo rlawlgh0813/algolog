@@ -192,6 +192,39 @@ Spring Boot 4에서는 기존 Boot 3 예제와 달리 `AutoConfigureMockMvc` 패
 
 결과: 성공
 
+## #14 Public solution exploration and filters
+
+### 브랜치
+
+- `feature/#14-public-solution-exploration`
+
+### 목적
+
+사용자가 공개 풀이와 자신의 학습 기록을 조건별로 탐색할 수 있게 합니다.
+
+### 작업 내용
+
+- 공개 풀이 목록 조회 API 추가
+- 특정 문제의 공개 풀이 목록 조회 API 추가
+- 플랫폼, 난이도, 해결 상태, 복습 필요 여부 필터 추가
+- 공개 풀이 목록 페이징 응답 적용
+- 특정 문제가 없을 때 `PROBLEM_NOT_FOUND` 응답 처리
+- 공개 풀이 탐색 통합 테스트 추가
+
+### 설계 메모
+
+- 공개 탐색 API는 인증 없이 접근할 수 있습니다.
+- 목록 조회는 `visibility = PUBLIC`인 풀이 기록만 반환합니다.
+- 특정 문제의 공개 풀이 조회는 먼저 Problem 존재 여부를 확인한 뒤 공개 풀이만 조회합니다.
+
+### 검증
+
+```bash
+./gradlew test
+```
+
+결과: 성공
+
 ## #10 Problem CRUD and search API
 
 ### 브랜치

@@ -6,7 +6,7 @@
 
 > Status: 진행 중
 >
-> Current stage: 인증 기반 Problem, SolutionRecord, CounterExample API 구현
+> Current stage: AlgoLog MVP 핵심 API 구현
 
 ## Why I Built This
 
@@ -97,10 +97,13 @@ AlgoLog는 이런 정보를 단순한 게시글 본문에 섞어두지 않고, �
   - 특정 풀이 기록의 반례 목록 조회
   - 풀이 기록 작성자 기반 반례 작성 권한 처리
   - 풀이 기록 공개 / 비공개 기준 반례 조회 권한 처리
+- 공개 풀이 탐색 API 구현
+  - 공개 풀이 목록 조회
+  - 특정 문제의 공개 풀이 조회
+  - 플랫폼, 난이도, 해결 상태, 복습 필요 여부 필터
 
 ### Next
 
-- 공개 풀이 목록과 특정 문제의 공개 풀이 조회
 - API 테스트와 문서화
 
 ## Architecture

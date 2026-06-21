@@ -143,6 +143,108 @@ class SolutionRecordControllerTest {
     }
 
     @Test
+    @DisplayName("공개 풀이 기록 목록을 조건으로 조회한다")
+    void searchPublicSolutionRecords() throws Exception {
+        TestUser owner = createUserAndToken("public-search");
+        Problem targetProblem = createProblem(uniquePlatform("PUB"), "Gold V");
+        Problem otherProblem = createProblem(uniquePlatform("PUB"), "Gold V");
+
+        solutionRecordRepository.save(SolutionRecord.builder()
+            .author(owner.user())
+            .problem(targetProblem)
+            .title("공개 검색 대상 풀이")
+            .solutionMemo("memo")
+            .mistakeNote("mistake")
+            .solvingStatus(SolvingStatus.NEED_RETRY)
+            .reviewNeeded(true)
+            .visibility(Visibility.PUBLIC)
+            .build());
+
+        solutionRecordRepository.save(SolutionRecord.builder()
+            .author(owner.user())
+            .problem(targetProblem)
+            .title("비공개 검색 제외 풀이")
+            .solvingStatus(SolvingStatus.NEED_RETRY)
+            .reviewNeeded(true)
+            .visibility(Visibility.PRIVATE)
+            .build());
+
+        solutionRecordRepository.save(SolutionRecord.builder()
+            .author(owner.user())
+            .problem(otherProblem)
+            .title("필터 검색 제외 풀이")
+            .solvingStatus(SolvingStatus.SOLVED)
+            .reviewNeeded(false)
+            .visibility(Visibility.PUBLIC)
+            .build());
+
+        mockMvc.perform(get("/api/public/solution-records")
+                .param("platform", targetProblem.getPlatform())
+                .param("difficulty", "Gold V")
+                .param("solvingStatus", "NEED_RETRY")
+                .param("reviewNeeded", "true")
+                .param("page", "0")
+                .param("size", "20"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].problem.id").value(targetProblem.getId()))
+            .andExpect(jsonPath("$.content[0].title").value("공개 검색 대상 풀이"))
+            .andExpect(jsonPath("$.content[0].visibility").value("PUBLIC"))
+            .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    @DisplayName("특정 문제의 공개 풀이 기록 목록을 조회한다")
+    void getPublicSolutionRecordsByProblem() throws Exception {
+        TestUser owner = createUserAndToken("public-problem");
+        Problem targetProblem = createProblem(uniquePlatform("BOJ"), "Silver V");
+        Problem otherProblem = createProblem(uniquePlatform("BOJ"), "Silver V");
+
+        solutionRecordRepository.save(SolutionRecord.builder()
+            .author(owner.user())
+            .problem(targetProblem)
+            .title("문제별 공개 풀이")
+            .solvingStatus(SolvingStatus.SOLVED)
+            .reviewNeeded(false)
+            .visibility(Visibility.PUBLIC)
+            .build());
+
+        solutionRecordRepository.save(SolutionRecord.builder()
+            .author(owner.user())
+            .problem(targetProblem)
+            .title("문제별 비공개 제외")
+            .solvingStatus(SolvingStatus.SOLVED)
+            .reviewNeeded(false)
+            .visibility(Visibility.PRIVATE)
+            .build());
+
+        solutionRecordRepository.save(SolutionRecord.builder()
+            .author(owner.user())
+            .problem(otherProblem)
+            .title("다른 문제 공개 제외")
+            .solvingStatus(SolvingStatus.SOLVED)
+            .reviewNeeded(false)
+            .visibility(Visibility.PUBLIC)
+            .build());
+
+        mockMvc.perform(get("/api/problems/{problemId}/public-solution-records", targetProblem.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].problem.id").value(targetProblem.getId()))
+            .andExpect(jsonPath("$.content[0].title").value("문제별 공개 풀이"))
+            .andExpect(jsonPath("$.content[0].visibility").value("PUBLIC"))
+            .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 문제의 공개 풀이 기록 목록을 조회하면 404 응답을 반환한다")
+    void getPublicSolutionRecordsByMissingProblem() throws Exception {
+        mockMvc.perform(get("/api/problems/{problemId}/public-solution-records", 999_999L))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.code").value("PROBLEM_NOT_FOUND"));
+    }
+
+    @Test
     @DisplayName("풀이 기록 상세 조회에 성공한다")
     void getSolutionRecord() throws Exception {
         TestUser testUser = createUserAndToken("detail");

@@ -60,6 +60,36 @@ public class SolutionRecordController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/api/public/solution-records")
+    public ResponseEntity<PageResponse<MySolutionRecordResponse>> searchPublic(
+        @RequestParam(required = false) String platform,
+        @RequestParam(required = false) String difficulty,
+        @RequestParam(required = false) SolvingStatus solvingStatus,
+        @RequestParam(required = false) Boolean reviewNeeded,
+        @PageableDefault(size = 20) Pageable pageable
+    ) {
+        PageResponse<MySolutionRecordResponse> response = solutionRecordService.searchPublic(
+            platform,
+            difficulty,
+            solvingStatus,
+            reviewNeeded,
+            pageable
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/problems/{problemId}/public-solution-records")
+    public ResponseEntity<PageResponse<MySolutionRecordResponse>> getPublicByProblemId(
+        @PathVariable Long problemId,
+        @PageableDefault(size = 20) Pageable pageable
+    ) {
+        PageResponse<MySolutionRecordResponse> response = solutionRecordService.getPublicByProblemId(
+            problemId,
+            pageable
+        );
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/api/solution-records/{solutionRecordId}")
     public ResponseEntity<SolutionRecordDetailResponse> getById(
         @AuthenticationPrincipal Long userId,
