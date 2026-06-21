@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/signup", "/api/auth/login", "/h2-console/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/problems", "/api/problems/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/solution-records/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/solution-records/*/counter-examples").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

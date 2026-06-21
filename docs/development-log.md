@@ -228,6 +228,46 @@ Spring Boot 4에서는 기존 Boot 3 예제와 달리 `AutoConfigureMockMvc` 패
 
 결과: 성공
 
+## #11 SolutionRecord CRUD API
+
+### 브랜치
+
+- `feature/#11-solution-record-api`
+
+### 목적
+
+AlgoLog의 핵심 도메인인 풀이 기록을 작성, 조회, 수정, 삭제할 수 있게 합니다.
+
+### 작업 내용
+
+- JWT 토큰 검증과 userId 추출 기능 추가
+- JWT 인증 필터 추가
+- Security 인증/인가 실패 JSON 응답 추가
+- `SolutionRecordRepository` 추가
+- 풀이 기록 작성 API 추가
+- 내 풀이 기록 목록 조회 API 추가
+- 풀이 기록 상세 조회 API 추가
+- 풀이 기록 수정 API 추가
+- 풀이 기록 삭제 API 추가
+- SolutionRecord 요청/응답 DTO 추가
+- Problem API 등록 테스트에 인증 흐름 반영
+- SolutionRecord API 통합 테스트 추가
+
+### 설계 메모
+
+- 풀이 기록 작성자는 요청 바디로 받지 않고 JWT의 subject userId로 결정합니다.
+- 수정/삭제와 현재 상세 조회는 작성자만 가능하도록 기본 접근 제한을 걸었습니다.
+- 공개 풀이의 비로그인 상세 조회, 비공개 조회 차단 같은 공개/비공개 정책은 `#13`에서 별도로 정리합니다.
+- 반례 목록은 아직 `#12` 범위이므로 상세 응답에서는 빈 배열로 반환합니다.
+
+### 검증
+
+```bash
+./gradlew test
+```
+
+결과: 성공
+
 ## #13 Visibility and ownership authorization
 
 ### 브랜치
@@ -260,37 +300,32 @@ Spring Boot 4에서는 기존 Boot 3 예제와 달리 `AutoConfigureMockMvc` 패
 
 결과: 성공
 
-## #11 SolutionRecord CRUD API
+## #12 CounterExample API
 
 ### 브랜치
 
-- `feature/#11-solution-record-api`
+- `feature/#12-counter-example-api`
 
 ### 목적
 
-AlgoLog의 핵심 도메인인 풀이 기록을 작성, 조회, 수정, 삭제할 수 있게 합니다.
+풀이 과정에서 실패했던 입력과 오답 원인을 별도 반례로 기록할 수 있게 합니다.
 
 ### 작업 내용
 
-- JWT 토큰 검증과 userId 추출 기능 추가
-- JWT 인증 필터 추가
-- Security 인증/인가 실패 JSON 응답 추가
-- `SolutionRecordRepository` 추가
-- 풀이 기록 작성 API 추가
-- 내 풀이 기록 목록 조회 API 추가
-- 풀이 기록 상세 조회 API 추가
-- 풀이 기록 수정 API 추가
-- 풀이 기록 삭제 API 추가
-- SolutionRecord 요청/응답 DTO 추가
-- Problem API 등록 테스트에 인증 흐름 반영
-- SolutionRecord API 통합 테스트 추가
+- `CounterExampleRepository` 추가
+- `CounterExampleCreateRequest`, `CounterExampleResponse` DTO 추가
+- 반례 작성 API 추가
+- 특정 풀이 기록의 반례 목록 조회 API 추가
+- 반례 작성자 권한 검증 추가
+- 공개/비공개 풀이 기록의 반례 조회 권한 적용
+- 풀이 기록 삭제 시 연결된 반례 삭제 처리
+- CounterExample API 통합 테스트 추가
 
 ### 설계 메모
 
-- 풀이 기록 작성자는 요청 바디로 받지 않고 JWT의 subject userId로 결정합니다.
-- 수정/삭제와 현재 상세 조회는 작성자만 가능하도록 기본 접근 제한을 걸었습니다.
-- 공개 풀이의 비로그인 상세 조회, 비공개 조회 차단 같은 공개/비공개 정책은 `#13`에서 별도로 정리합니다.
-- 반례 목록은 아직 `#12` 범위이므로 상세 응답에서는 빈 배열로 반환합니다.
+- 반례 작성은 풀이 기록 작성자만 가능합니다.
+- 반례 조회 권한은 연결된 SolutionRecord의 공개/비공개 조회 권한을 그대로 따릅니다.
+- 현재 SolutionRecord와 CounterExample은 단방향 연관관계이므로, 풀이 기록 삭제 시 Service 계층에서 반례를 먼저 삭제합니다.
 
 ### 검증
 
