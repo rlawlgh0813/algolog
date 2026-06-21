@@ -130,3 +130,69 @@ Controller는 HTTP 요청과 응답 처리에 집중하고, "비공개 글은 �
 ### 배운 점
 
 권한 검증은 단순한 요청 처리 로직이 아니라 서비스 정책에 가까우므로, 재사용성과 일관성을 고려해 Service 계층에서 처리하는 편이 적절하다.
+
+## Spring Security 인증 실패 응답 처리
+
+### 상황
+
+JWT 인증 필터를 추가하면서 인증이 필요한 API에 토큰 없이 접근하면 JSON 에러 응답을 내려야 했다.
+
+### 원인
+
+Controller나 Service에서 발생한 `BusinessException`은 `GlobalExceptionHandler`가 처리하지만, 인증 실패는 Spring MVC Controller에 도달하기 전 Security Filter Chain에서 발생한다. 따라서 `@RestControllerAdvice`만으로는 `UNAUTHORIZED`, `ACCESS_DENIED` 응답 형식을 통일할 수 없었다.
+
+### 해결
+
+`SecurityConfig`의 `exceptionHandling`에 `authenticationEntryPoint`와 `accessDeniedHandler`를 설정하고, `SecurityErrorResponseWriter`가 프로젝트의 `ErrorResponse` 형식과 같은 JSON을 직접 쓰도록 했다.
+
+### 선택 이유
+
+인증/인가 실패는 Security 계층의 책임이므로, ControllerAdvice로 억지로 끌어오기보다 Security 설정에서 응답 형식을 맞추는 편이 책임 경계가 명확하다.
+
+### 배운 점
+
+Spring Security 필터 단계의 예외와 Spring MVC 계층의 예외는 처리 경로가 다르다. 인증/인가 실패 응답을 통일하려면 Security 전용 진입점을 설정해야 한다.
+
+## 공개/비공개 풀이 조회 권한 검증 위치
+
+### 상황
+
+풀이 기록 상세 조회와 반례 목록 조회에서 공개 풀이 기록은 누구나 볼 수 있고, 비공개 풀이 기록은 작성자만 볼 수 있어야 했다.
+
+### 원인
+
+Security 설정만으로는 `SolutionRecord.visibility`와 작성자 ID를 함께 고려하기 어렵다. URL 패턴만으로 공개/비공개 여부를 알 수 없기 때문이다.
+
+### 해결
+
+GET 엔드포인트는 Security 레벨에서 열어두고, Service 계층에서 조회한 `SolutionRecord`의 `visibility`와 현재 사용자 ID를 비교해 접근 가능 여부를 판단했다.
+
+### 선택 이유
+
+공개/비공개는 HTTP 경로 규칙이 아니라 도메인 데이터에 기반한 정책이다. 따라서 Service 계층에서 처리하면 상세 조회와 반례 조회가 같은 정책을 재사용할 수 있다.
+
+### 배운 점
+
+권한 검증은 모두 Security 설정에 넣는 것이 아니라, URL만으로 판단 가능한 인증 요구와 도메인 데이터가 필요한 인가 규칙을 나누는 것이 좋다.
+
+## 풀이 기록 삭제 시 반례 삭제 처리
+
+### 상황
+
+`SolutionRecord`를 삭제할 때 연결된 `CounterExample`도 함께 삭제되어야 했다. 테스트에서 반례가 연결된 풀이 기록 삭제가 실패했다.
+
+### 원인
+
+현재 엔티티 관계는 `CounterExample -> SolutionRecord` 단방향 `ManyToOne`만 열려 있다. `SolutionRecord` 쪽에 컬렉션과 cascade를 두지 않았기 때문에, 부모인 풀이 기록을 먼저 삭제하면 DB 외래 키 제약에 걸릴 수 있다.
+
+### 해결
+
+`SolutionRecordService.delete`에서 `CounterExampleRepository.deleteAllBySolutionRecordId`를 먼저 호출한 뒤 `SolutionRecord`를 삭제하도록 명시했다.
+
+### 선택 이유
+
+초기 설계 원칙이 양방향 연관관계를 최소화하는 것이었으므로, 삭제 하나를 위해 `SolutionRecord`에 컬렉션을 추가하기보다 Repository에서 명시 삭제하는 방식이 더 단순하고 의도가 분명했다.
+
+### 배운 점
+
+JPA cascade는 편리하지만 연관관계 방향과 객체 그래프를 넓힌다. 단방향 관계를 유지하는 설계에서는 삭제 순서를 Service 계층에서 명시하는 방식도 충분히 실용적이다.
