@@ -159,11 +159,48 @@ class SolutionRecordControllerTest {
     }
 
     @Test
-    @DisplayName("다른 사용자의 풀이 기록을 조회하면 403 응답을 반환한다")
-    void getOtherUserSolutionRecord() throws Exception {
+    @DisplayName("공개 풀이 기록은 인증 없이 상세 조회할 수 있다")
+    void getPublicSolutionRecordWithoutAuthentication() throws Exception {
         TestUser owner = createUserAndToken("owner");
+        SolutionRecord solutionRecord = createSolutionRecord(owner.user(), createProblem(), Visibility.PUBLIC);
+
+        mockMvc.perform(get("/api/solution-records/{solutionRecordId}", solutionRecord.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(solutionRecord.getId()))
+            .andExpect(jsonPath("$.visibility").value("PUBLIC"));
+    }
+
+    @Test
+    @DisplayName("공개 풀이 기록은 다른 사용자도 상세 조회할 수 있다")
+    void getOtherUserPublicSolutionRecord() throws Exception {
+        TestUser owner = createUserAndToken("owner-public");
+        TestUser other = createUserAndToken("other-public");
+        SolutionRecord solutionRecord = createSolutionRecord(owner.user(), createProblem(), Visibility.PUBLIC);
+
+        mockMvc.perform(get("/api/solution-records/{solutionRecordId}", solutionRecord.getId())
+                .header("Authorization", other.authorizationHeader()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(solutionRecord.getId()))
+            .andExpect(jsonPath("$.visibility").value("PUBLIC"));
+    }
+
+    @Test
+    @DisplayName("비공개 풀이 기록은 인증 없이 조회할 수 없다")
+    void getPrivateSolutionRecordWithoutAuthentication() throws Exception {
+        TestUser owner = createUserAndToken("owner-private-anonymous");
+        SolutionRecord solutionRecord = createSolutionRecord(owner.user(), createProblem(), Visibility.PRIVATE);
+
+        mockMvc.perform(get("/api/solution-records/{solutionRecordId}", solutionRecord.getId()))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    @DisplayName("비공개 풀이 기록은 다른 사용자가 조회할 수 없다")
+    void getOtherUserPrivateSolutionRecord() throws Exception {
+        TestUser owner = createUserAndToken("owner-private");
         TestUser other = createUserAndToken("other");
-        SolutionRecord solutionRecord = createSolutionRecord(owner.user(), createProblem());
+        SolutionRecord solutionRecord = createSolutionRecord(owner.user(), createProblem(), Visibility.PRIVATE);
 
         mockMvc.perform(get("/api/solution-records/{solutionRecordId}", solutionRecord.getId())
                 .header("Authorization", other.authorizationHeader()))
@@ -210,6 +247,10 @@ class SolutionRecordControllerTest {
     }
 
     private SolutionRecord createSolutionRecord(User author, Problem problem) {
+        return createSolutionRecord(author, problem, Visibility.PUBLIC);
+    }
+
+    private SolutionRecord createSolutionRecord(User author, Problem problem, Visibility visibility) {
         return solutionRecordRepository.save(SolutionRecord.builder()
             .author(author)
             .problem(problem)
@@ -218,7 +259,7 @@ class SolutionRecordControllerTest {
             .mistakeNote("실수 메모")
             .solvingStatus(SolvingStatus.SOLVED)
             .reviewNeeded(false)
-            .visibility(Visibility.PUBLIC)
+            .visibility(visibility)
             .build());
     }
 
