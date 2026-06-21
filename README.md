@@ -4,7 +4,7 @@
 
 블로그나 노션에 풀이를 자유롭게 적는 방식은 편하지만, 문제 정보, 오답 원인, 반례, 복습 필요 여부를 일관된 기준으로 다시 찾기 어렵습니다. AlgoLog는 풀이 기록을 `Problem`, `SolutionRecord`, `CounterExample`로 분리해 저장하고, 사용자가 자신의 문제 풀이 과정을 복습 가능한 데이터로 관리할 수 있게 만드는 것을 목표로 합니다.
 
-> Status: 진행 중
+> Status: MVP implemented
 >
 > Current stage: AlgoLog MVP 핵심 API 구현
 
@@ -104,7 +104,9 @@ AlgoLog는 이런 정보를 단순한 게시글 본문에 섞어두지 않고, �
 
 ### Next
 
-- API 테스트와 문서화
+- README / API 명세 / 개발 로그 최종 정리
+- Swagger 또는 Spring REST Docs 도입 검토
+- MySQL 환경 분리와 배포 준비
 
 ## Architecture
 
@@ -199,6 +201,11 @@ erDiagram
 
 ## Run Locally
 
+Requirements:
+
+- Java 17
+- Git
+
 ```bash
 ./gradlew bootRun
 ```
@@ -213,4 +220,38 @@ Run tests:
 
 ```bash
 ./gradlew test
+```
+
+H2 Console:
+
+- URL: `http://localhost:8080/h2-console`
+- JDBC URL: `jdbc:h2:mem:algolog`
+- User Name: `sa`
+- Password: empty
+
+## API Quick Start
+
+1. 회원가입
+
+```bash
+curl -X POST http://localhost:8080/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"password1234","nickname":"algo_user"}'
+```
+
+2. 로그인 후 `accessToken` 확인
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"password1234"}'
+```
+
+3. 인증이 필요한 API는 `Authorization` 헤더 사용
+
+```bash
+curl -X POST http://localhost:8080/api/problems \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {accessToken}" \
+  -d '{"platform":"BOJ","problemNumber":"1000","title":"A+B","difficulty":"Bronze V"}'
 ```

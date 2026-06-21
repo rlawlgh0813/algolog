@@ -1,6 +1,6 @@
-# API 명세 초안
+# API 명세
 
-이 문서는 AlgoLog MVP 기준 API 초안입니다. 실제 구현 중 DTO 필드명과 응답 형식은 일부 조정될 수 있습니다.
+이 문서는 AlgoLog MVP 구현 기준 API 명세입니다.
 
 ## 1. 기본 정책
 
@@ -40,7 +40,8 @@ Authorization: Bearer {accessToken}
 ```json
 {
   "code": "PROBLEM_NOT_FOUND",
-  "message": "문제를 찾을 수 없습니다."
+  "message": "문제를 찾을 수 없습니다.",
+  "fieldErrors": []
 }
 ```
 
@@ -56,7 +57,7 @@ Authorization: Bearer {accessToken}
 | size | 20 | 페이지 크기 |
 | sort | createdAt,desc | 정렬 기준 |
 
-Spring Data의 `Page` 응답을 그대로 노출하기보다, 추후 별도 페이지 응답 DTO를 사용할 수 있습니다.
+Spring Data의 `Page` 응답을 그대로 노출하지 않고 별도 페이지 응답 DTO를 사용합니다.
 
 ## 2. 인증 API
 
@@ -361,15 +362,7 @@ Response:
   "solvingStatus": "SOLVED",
   "reviewNeeded": false,
   "visibility": "PUBLIC",
-  "counterExamples": [
-    {
-      "id": 1,
-      "inputExample": "1 2",
-      "expectedBehavior": "3",
-      "wrongReason": "개행 처리 실수",
-      "fixMemo": "Scanner 대신 BufferedReader 사용"
-    }
-  ],
+  "counterExamples": [],
   "createdAt": "2026-04-29T10:00:00",
   "updatedAt": "2026-04-29T10:00:00"
 }
@@ -379,6 +372,11 @@ Response:
 
 - `SOLUTION_RECORD_NOT_FOUND`
 - `ACCESS_DENIED`
+
+구현 메모:
+
+- 현재 상세 응답의 `counterExamples`는 빈 배열로 반환합니다.
+- 반례 목록은 `GET /api/solution-records/{solutionRecordId}/counter-examples`에서 별도로 조회합니다.
 
 ### 4.4 풀이 기록 수정
 
@@ -502,6 +500,7 @@ Response:
 [
   {
     "id": 1,
+    "solutionRecordId": 1,
     "inputExample": "1 2",
     "expectedBehavior": "3",
     "wrongReason": "입력 파싱을 잘못 처리했다.",
@@ -541,6 +540,34 @@ Query Parameters:
 
 - `visibility = PUBLIC`인 풀이 기록만 반환합니다.
 
+Response:
+
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "problem": {
+        "id": 1,
+        "platform": "BOJ",
+        "problemNumber": "1000",
+        "title": "A+B",
+        "difficulty": "Bronze V"
+      },
+      "title": "입출력 형식에 주의한 풀이",
+      "solvingStatus": "SOLVED",
+      "reviewNeeded": false,
+      "visibility": "PUBLIC",
+      "createdAt": "2026-04-29T10:00:00"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
+
 ### 6.2 특정 문제의 공개 풀이 조회
 
 ```http
@@ -552,6 +579,34 @@ GET /api/problems/{problemId}/public-solution-records
 정책:
 
 - 특정 Problem에 연결된 공개 풀이만 반환합니다.
+
+Response:
+
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "problem": {
+        "id": 1,
+        "platform": "BOJ",
+        "problemNumber": "1000",
+        "title": "A+B",
+        "difficulty": "Bronze V"
+      },
+      "title": "입출력 형식에 주의한 풀이",
+      "solvingStatus": "SOLVED",
+      "reviewNeeded": false,
+      "visibility": "PUBLIC",
+      "createdAt": "2026-04-29T10:00:00"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
 
 예외:
 

@@ -192,39 +192,6 @@ Spring Boot 4에서는 기존 Boot 3 예제와 달리 `AutoConfigureMockMvc` 패
 
 결과: 성공
 
-## #14 Public solution exploration and filters
-
-### 브랜치
-
-- `feature/#14-public-solution-exploration`
-
-### 목적
-
-사용자가 공개 풀이와 자신의 학습 기록을 조건별로 탐색할 수 있게 합니다.
-
-### 작업 내용
-
-- 공개 풀이 목록 조회 API 추가
-- 특정 문제의 공개 풀이 목록 조회 API 추가
-- 플랫폼, 난이도, 해결 상태, 복습 필요 여부 필터 추가
-- 공개 풀이 목록 페이징 응답 적용
-- 특정 문제가 없을 때 `PROBLEM_NOT_FOUND` 응답 처리
-- 공개 풀이 탐색 통합 테스트 추가
-
-### 설계 메모
-
-- 공개 탐색 API는 인증 없이 접근할 수 있습니다.
-- 목록 조회는 `visibility = PUBLIC`인 풀이 기록만 반환합니다.
-- 특정 문제의 공개 풀이 조회는 먼저 Problem 존재 여부를 확인한 뒤 공개 풀이만 조회합니다.
-
-### 검증
-
-```bash
-./gradlew test
-```
-
-결과: 성공
-
 ## #10 Problem CRUD and search API
 
 ### 브랜치
@@ -359,6 +326,70 @@ AlgoLog의 핵심 도메인인 풀이 기록을 작성, 조회, 수정, 삭제�
 - 반례 작성은 풀이 기록 작성자만 가능합니다.
 - 반례 조회 권한은 연결된 SolutionRecord의 공개/비공개 조회 권한을 그대로 따릅니다.
 - 현재 SolutionRecord와 CounterExample은 단방향 연관관계이므로, 풀이 기록 삭제 시 Service 계층에서 반례를 먼저 삭제합니다.
+
+### 검증
+
+```bash
+./gradlew test
+```
+
+결과: 성공
+
+## #14 Public solution exploration and filters
+
+### 브랜치
+
+- `feature/#14-public-solution-exploration`
+
+### 목적
+
+사용자가 공개 풀이와 자신의 학습 기록을 조건별로 탐색할 수 있게 합니다.
+
+### 작업 내용
+
+- 공개 풀이 목록 조회 API 추가
+- 특정 문제의 공개 풀이 목록 조회 API 추가
+- 플랫폼, 난이도, 해결 상태, 복습 필요 여부 필터 추가
+- 공개 풀이 목록 페이징 응답 적용
+- 특정 문제가 없을 때 `PROBLEM_NOT_FOUND` 응답 처리
+- 공개 풀이 탐색 통합 테스트 추가
+
+### 설계 메모
+
+- 공개 탐색 API는 인증 없이 접근할 수 있습니다.
+- 목록 조회는 `visibility = PUBLIC`인 풀이 기록만 반환합니다.
+- 특정 문제의 공개 풀이 조회는 먼저 Problem 존재 여부를 확인한 뒤 공개 풀이만 조회합니다.
+
+### 검증
+
+```bash
+./gradlew test
+```
+
+결과: 성공
+
+## #15 README, API spec, and development log 정리
+
+### 브랜치
+
+- `docs/#15-refresh-mvp-docs`
+
+### 목적
+
+MVP 구현 결과를 문서와 포트폴리오 설명에 맞게 정리합니다.
+
+### 작업 내용
+
+- README 구현 현황과 실행 방법 갱신
+- API 명세를 구현된 DTO와 응답 형식에 맞게 조정
+- 공개 풀이 탐색 응답 예시 추가
+- development log 이슈 순서 정리
+- troubleshooting 문서에 구현 중 실제 설계 판단 기록 추가
+
+### 설계 메모
+
+- API 상세 구현은 이미 테스트로 검증되어 있으므로 이번 작업은 코드 변경 없이 문서 정합성에 집중합니다.
+- README는 새 사용자가 로컬 실행, 테스트, H2 접속, 기본 API 호출을 바로 따라 할 수 있는 정도로 보강합니다.
 
 ### 검증
 
