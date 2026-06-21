@@ -1,5 +1,7 @@
 package com.algolog.controller.auth;
 
+import com.algolog.dto.auth.LoginRequest;
+import com.algolog.dto.auth.LoginResponse;
 import com.algolog.dto.auth.SignupRequest;
 import com.algolog.dto.auth.SignupResponse;
 import com.algolog.service.auth.AuthService;
@@ -23,5 +25,11 @@ public class AuthController {
     public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest request) {
         SignupResponse response = authService.signup(request);
         return ResponseEntity.created(URI.create("/api/users/" + response.id())).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
     }
 }

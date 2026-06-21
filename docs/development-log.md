@@ -81,6 +81,42 @@ PowerShell `Set-Content -Encoding UTF8`로 Java 파일을 생성하면서 BOM �
 ```
 
 결과: 성공
+
+## #9 로그인 API와 JWT 발급 구현
+
+### 브랜치
+
+- `feature/#9-auth-login-jwt`
+
+### 목적
+
+회원가입한 사용자가 이메일과 비밀번호로 로그인하고, 이후 인증 API에서 사용할 JWT Access Token을 발급받을 수 있게 합니다.
+
+### 작업 내용
+
+- `LoginRequest`, `LoginResponse` DTO 추가
+- 로그인 API 추가
+- 이메일 기반 사용자 조회와 BCrypt 비밀번호 검증 추가
+- HMAC-SHA256 기반 JWT Access Token 발급 컴포넌트 추가
+- JWT 설정값 추가
+  - `JWT_SECRET`
+  - `JWT_ACCESS_TOKEN_EXPIRATION_MILLIS`
+- Security 설정에 로그인 엔드포인트 허용과 stateless 세션 정책 추가
+- 로그인 성공/실패 API 테스트 추가
+
+### 설계 메모
+
+- 로그인 실패는 계정 존재 여부를 노출하지 않도록 `INVALID_LOGIN`으로 통일했습니다.
+- JWT secret과 만료 시간은 환경변수로 덮어쓸 수 있게 하고, 로컬 개발 기본값만 `application.yml`에 두었습니다.
+- 이번 단계에서는 토큰 발급까지만 구현하고, 요청마다 토큰을 검증하는 인증 필터와 권한 실패 응답은 이후 인증/인가 이슈에서 보강합니다.
+
+### 검증
+
+```bash
+./gradlew test
+```
+
+결과: 성공
 ## #5 전역 예외 처리 구조 구현
 
 ### 브랜치
