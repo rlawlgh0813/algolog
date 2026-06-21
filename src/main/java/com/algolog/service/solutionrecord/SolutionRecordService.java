@@ -3,6 +3,7 @@ package com.algolog.service.solutionrecord;
 import com.algolog.domain.problem.Problem;
 import com.algolog.domain.solutionrecord.SolutionRecord;
 import com.algolog.domain.solutionrecord.SolvingStatus;
+import com.algolog.domain.solutionrecord.Visibility;
 import com.algolog.domain.user.User;
 import com.algolog.dto.common.PageResponse;
 import com.algolog.dto.solutionrecord.MySolutionRecordResponse;
@@ -72,7 +73,7 @@ public class SolutionRecordService {
     @Transactional(readOnly = true)
     public SolutionRecordDetailResponse getById(Long currentUserId, Long solutionRecordId) {
         SolutionRecord solutionRecord = getSolutionRecord(solutionRecordId);
-        validateAuthor(currentUserId, solutionRecord);
+        validateReadable(currentUserId, solutionRecord);
         return SolutionRecordDetailResponse.from(solutionRecord);
     }
 
@@ -118,6 +119,13 @@ public class SolutionRecordService {
         if (!solutionRecord.getAuthor().getId().equals(currentUserId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
+    }
+
+    private void validateReadable(Long currentUserId, SolutionRecord solutionRecord) {
+        if (solutionRecord.getVisibility() == Visibility.PUBLIC) {
+            return;
+        }
+        validateAuthor(currentUserId, solutionRecord);
     }
 
     private String normalize(String value) {

@@ -6,7 +6,7 @@
 
 > Status: 진행 중
 >
-> Current stage: 인증 기반 Problem API와 SolutionRecord CRUD API 구현
+> Current stage: 인증 기반 Problem API와 SolutionRecord CRUD/권한 처리 구현
 
 ## Why I Built This
 
@@ -90,11 +90,12 @@ AlgoLog는 이런 정보를 단순한 게시글 본문에 섞어두지 않고, �
   - 풀이 기록 수정
   - 풀이 기록 삭제
   - 작성자 기준 기본 접근 제한
+  - 공개 풀이 비로그인 / 타 사용자 조회 허용
+  - 비공개 풀이 작성자 전용 조회
 
 ### Next
 
 - CounterExample API 구현
-- 공개 / 비공개 조회 권한 처리
 - API 테스트와 문서화
 
 ## Architecture
