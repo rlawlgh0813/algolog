@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.algolog.domain.problem.Problem;
+import com.algolog.dto.auth.LoginRequest;
+import com.algolog.dto.auth.SignupRequest;
 import com.algolog.dto.problem.ProblemCreateRequest;
 import com.algolog.repository.problem.ProblemRepository;
 import java.util.UUID;
@@ -44,6 +46,7 @@ class ProblemControllerTest {
 
         mockMvc.perform(post("/api/problems")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", bearerToken())
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
             .andExpect(header().string("Location", org.hamcrest.Matchers.startsWith("/api/problems/")))
@@ -64,11 +67,13 @@ class ProblemControllerTest {
 
         mockMvc.perform(post("/api/problems")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", bearerToken())
                 .content(objectMapper.writeValueAsString(firstRequest)))
             .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/problems")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", bearerToken())
                 .content(objectMapper.writeValueAsString(secondRequest)))
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.code").value("DUPLICATE_PROBLEM"));
@@ -143,5 +148,26 @@ class ProblemControllerTest {
 
     private String uniqueProblemNumber() {
         return UUID.randomUUID().toString();
+    }
+
+    private String bearerToken() throws Exception {
+        String email = "problem-" + UUID.randomUUID() + "@example.com";
+        String password = "password1234";
+
+        mockMvc.perform(post("/api/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new SignupRequest(email, password, "problem-user"))))
+            .andExpect(status().isCreated());
+
+        String response = mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new LoginRequest(email, password))))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        String accessToken = objectMapper.readTree(response).get("accessToken").asText();
+        return "Bearer " + accessToken;
     }
 }

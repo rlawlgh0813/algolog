@@ -86,4 +86,20 @@ public class SolutionRecord extends BaseTimeEntity {
         this.reviewNeeded = reviewNeeded;
         this.visibility = visibility;
     }
+
+    public void update(
+        String title,
+        String solutionMemo,
+        String mistakeNote,
+        SolvingStatus solvingStatus,
+        boolean reviewNeeded,
+        Visibility visibility
+    ) {
+        this.title = title;
+        this.solutionMemo = solutionMemo;
+        this.mistakeNote = mistakeNote;
+        this.solvingStatus = solvingStatus;
+        this.reviewNeeded = reviewNeeded;
+        this.visibility = visibility;
+    }
 }
