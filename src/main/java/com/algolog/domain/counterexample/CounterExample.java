@@ -38,7 +38,7 @@ public class CounterExample extends BaseTimeEntity {
     private SolutionRecord solutionRecord;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 65_535)
     private String inputExample;
 
     @Lob

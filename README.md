@@ -252,6 +252,14 @@ H2 Console:
 
 Use the `mysql` profile when you want to run AlgoLog against MySQL.
 
+Start MySQL:
+
+```bash
+docker compose up -d mysql
+```
+
+Run the application with the MySQL profile:
+
 ```bash
 SPRING_PROFILES_ACTIVE=mysql \
 MYSQL_URL='jdbc:mysql://localhost:3306/algolog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8' \
@@ -259,6 +267,24 @@ MYSQL_USERNAME=algolog \
 MYSQL_PASSWORD=algolog \
 JWT_SECRET='change-this-to-a-long-random-secret' \
 ./gradlew bootRun
+```
+
+Run the smoke test against the MySQL-backed application:
+
+```bash
+BASE_URL=http://localhost:8080 ./scripts/smoke-test.sh
+```
+
+Stop MySQL:
+
+```bash
+docker compose down
+```
+
+Remove the local MySQL data volume:
+
+```bash
+docker compose down -v
 ```
 
 MySQL profile environment variables:
