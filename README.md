@@ -211,6 +211,8 @@ Requirements:
 - Java 17
 - Git
 
+Default profile is `local`, which uses in-memory H2.
+
 ```bash
 ./gradlew bootRun
 ```
@@ -245,6 +247,30 @@ H2 Console:
 - JDBC URL: `jdbc:h2:mem:algolog`
 - User Name: `sa`
 - Password: empty
+
+## Run With MySQL
+
+Use the `mysql` profile when you want to run AlgoLog against MySQL.
+
+```bash
+SPRING_PROFILES_ACTIVE=mysql \
+MYSQL_URL='jdbc:mysql://localhost:3306/algolog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8' \
+MYSQL_USERNAME=algolog \
+MYSQL_PASSWORD=algolog \
+JWT_SECRET='change-this-to-a-long-random-secret' \
+./gradlew bootRun
+```
+
+MySQL profile environment variables:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `MYSQL_URL` | `jdbc:mysql://localhost:3306/algolog?...` | MySQL JDBC URL |
+| `MYSQL_USERNAME` | `algolog` | MySQL user |
+| `MYSQL_PASSWORD` | `algolog` | MySQL password |
+| `JWT_SECRET` | required | JWT signing secret |
+| `JWT_ACCESS_TOKEN_EXPIRATION_MILLIS` | `3600000` | Access token lifetime |
+| `JPA_DDL_AUTO` | `update` | Hibernate schema mode until Flyway is introduced |
 
 OpenAPI:
 
