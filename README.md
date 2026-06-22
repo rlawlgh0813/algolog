@@ -227,6 +227,18 @@ Run tests:
 ./gradlew test
 ```
 
+Run API smoke test after starting the server:
+
+```bash
+./scripts/smoke-test.sh
+```
+
+Use another server URL:
+
+```bash
+BASE_URL=http://localhost:8080 ./scripts/smoke-test.sh
+```
+
 H2 Console:
 
 - URL: `http://localhost:8080/h2-console`
