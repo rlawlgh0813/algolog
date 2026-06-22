@@ -42,7 +42,13 @@ public class SecurityConfig {
                     securityErrorResponseWriter.write(response, ErrorCode.ACCESS_DENIED))
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/signup", "/api/auth/login", "/h2-console/**").permitAll()
+                .requestMatchers(
+                    "/api/auth/signup",
+                    "/api/auth/login",
+                    "/h2-console/**",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**"
+                ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/problems", "/api/problems/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/public/solution-records").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/problems/*/public-solution-records").permitAll()

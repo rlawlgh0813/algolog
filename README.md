@@ -101,12 +101,17 @@ AlgoLog는 이런 정보를 단순한 게시글 본문에 섞어두지 않고, �
   - 공개 풀이 목록 조회
   - 특정 문제의 공개 풀이 조회
   - 플랫폼, 난이도, 해결 상태, 복습 필요 여부 필터
+- Swagger / OpenAPI 문서화
+  - Swagger UI 제공
+  - JWT Bearer 인증 입력 지원
+  - Auth, Problem, SolutionRecord, CounterExample, Public API 그룹 제공
 
 ### Next
 
-- README / API 명세 / 개발 로그 최종 정리
-- Swagger 또는 Spring REST Docs 도입 검토
 - MySQL 환경 분리와 배포 준비
+- Flyway 기반 DB migration 도입
+- API smoke test script 또는 collection 추가
+- 테스트 커버리지와 JWT 보안 강화
 
 ## Architecture
 
@@ -228,6 +233,12 @@ H2 Console:
 - JDBC URL: `jdbc:h2:mem:algolog`
 - User Name: `sa`
 - Password: empty
+
+OpenAPI:
+
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Grouped docs: `auth`, `problem`, `solution-record`, `counter-example`, `public`
 
 ## API Quick Start
 
