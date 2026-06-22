@@ -270,7 +270,12 @@ MySQL profile environment variables:
 | `MYSQL_PASSWORD` | `algolog` | MySQL password |
 | `JWT_SECRET` | required | JWT signing secret |
 | `JWT_ACCESS_TOKEN_EXPIRATION_MILLIS` | `3600000` | Access token lifetime |
-| `JPA_DDL_AUTO` | `update` | Hibernate schema mode until Flyway is introduced |
+| `JPA_DDL_AUTO` | `validate` | Hibernate schema validation mode |
+
+Database schema is managed by Flyway migrations:
+
+- Local H2: `src/main/resources/db/migration/h2`
+- MySQL: `src/main/resources/db/migration/mysql`
 
 OpenAPI:
 
